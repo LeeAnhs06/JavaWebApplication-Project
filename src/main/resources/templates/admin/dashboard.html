@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+        body{
+            background:#f4f7fb;
+            margin:0;
+        }
+
+        .sidebar-wrapper{
+            position:fixed;
+            width:250px;
+            height:100vh;
+            left:0;
+            top:0;
+            z-index:1100;
+        }
+
+        .main-content{
+            margin-left:250px;
+            padding:40px;
+            min-height:100vh;
+        }
+
+        .dashboard-title{
+            font-weight:bold;
+            color:#0d6efd;
+        }
+
+        .dashboard-card{
+            border:none;
+            border-radius:20px;
+            transition:0.3s;
+        }
+
+        .dashboard-card:hover{
+            transform:translateY(-5px);
+        }
+
+        .icon-box{
+            width:70px;
+            height:70px;
+            border-radius:15px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:30px;
+            color:white;
+            margin-bottom:20px;
+        }
+    </style>
+
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar-wrapper">
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="main-content">
+
+    <h2 class="dashboard-title mb-5">
+        Admin Dashboard
+    </h2>
+
+    <div class="row g-4">
+
+        <!-- PROFILE -->
+        <div class="col-md-4">
+            <div class="card shadow dashboard-card p-4">
+
+                <div class="icon-box bg-primary">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+                <h4>Quản lý hồ sơ</h4>
+
+                <p class="text-muted">
+                    Quản lý thông tin hồ sơ cá nhân.
+                </p>
+
+                <a href="/admin/profile" class="btn btn-primary">
+                    Quản lý
+                </a>
+
+            </div>
+        </div>
+
+        <!-- TEST TYPE -->
+        <div class="col-md-4">
+            <div class="card shadow dashboard-card p-4">
+
+                <div class="icon-box bg-success">
+                    <i class="fa-solid fa-vials"></i>
+                </div>
+
+                <h4>Loại xét nghiệm</h4>
+
+                <p class="text-muted">
+                    Xem danh mục loại xét nghiệm.
+                </p>
+
+                <a href="/admin/test-types" class="btn btn-success">
+                    Xem
+                </a>
+
+            </div>
+        </div>
+
+        <!-- MEDICINE -->
+        <div class="col-md-4">
+            <div class="card shadow dashboard-card p-4">
+
+                <div class="icon-box bg-info">
+                    <i class="fa-solid fa-capsules"></i>
+                </div>
+
+                <h4>Danh mục thuốc</h4>
+
+                <p class="text-muted">
+                    CRUD danh mục thuốc.
+                </p>
+
+                <a href="/admin/medicines" class="btn btn-info text-white">
+                    Quản lý
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

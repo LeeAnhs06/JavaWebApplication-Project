@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đặt lịch khám</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        body { background:#f4f7fb; overflow-x:hidden; }
+        .sidebar-wrapper { position:fixed; top:0; left:0; width:250px; height:100vh; z-index:1000; }
+        .main-content { margin-left:250px; padding:40px; }
+        .card { border:none; border-radius:20px; }
+        @media(max-width:768px){
+            .sidebar-wrapper{ position:relative; width:100%; height:auto; }
+            .main-content{ margin-left:0; padding:20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-wrapper">
+    <div th:replace="~{fragments/patient-sidebar :: sidebar}"></div>
+</div>
+
+<div class="main-content">
+    <div class="card shadow p-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary fw-bold m-0">Đặt lịch khám</h2>
+            <a href="/patient/appointments" class="btn btn-secondary">
+                Quay lại
+            </a>
+        </div>
+
+        <!-- ✅ chỉ dùng lỗi đỏ từ backend -->
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <!-- ✅ novalidate để không hiện popup HTML5 -->
+        <form method="post" action="/patient/appointments/save" novalidate>
+
+            <!-- Specialty -->
+            <div class="mb-3">
+                <label class="form-label">Chuyên khoa</label>
+                <select class="form-select" name="specialtyId">
+                    <option value="">-- Chọn chuyên khoa --</option>
+                    <option th:each="s : ${specialties}"
+                            th:value="${s.id}"
+                            th:text="${s.name}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Doctor -->
+            <div class="mb-3">
+                <label class="form-label">Bác sĩ</label>
+                <select class="form-select" name="doctorId">
+                    <option value="">-- Chọn bác sĩ --</option>
+                    <option th:each="d : ${doctors}"
+                            th:value="${d.id}"
+                            th:text="${d.fullName}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Date -->
+            <div class="mb-3">
+                <label class="form-label">Ngày khám</label>
+                <input type="date" class="form-control" name="appointmentDate">
+            </div>
+
+            <!-- Time -->
+            <div class="mb-4">
+                <label class="form-label">Giờ khám</label>
+                <input type="time" class="form-control" name="appointmentTime">
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                Đặt lịch
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

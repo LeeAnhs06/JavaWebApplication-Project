@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch khám của tôi</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+        body{
+            background:#f4f7fb;
+            overflow-x:hidden;
+        }
+        .sidebar-wrapper{
+            position:fixed;
+            top:0;
+            left:0;
+            width:250px;
+            height:100vh;
+            z-index:1000;
+        }
+        .main-content{
+            margin-left:250px;
+            padding:40px;
+        }
+        .card{
+            border:none;
+            border-radius:20px;
+        }
+        .table{
+            vertical-align:middle;
+        }
+        .badge{
+            padding:10px 14px;
+            font-size:14px;
+        }
+        @media(max-width:768px){
+            .sidebar-wrapper{
+                position:relative;
+                width:100%;
+                height:auto;
+            }
+            .main-content{
+                margin-left:0;
+                padding:20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-wrapper">
+    <div th:replace="~{fragments/patient-sidebar :: sidebar}"></div>
+</div>
+
+<div class="main-content">
+
+    <!-- BOOKING FORM -->
+    <div class="card shadow p-5 mb-4" id="book-form">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary fw-bold m-0">Đặt lịch khám</h2>
+
+            <a href="/patient/appointments" class="btn btn-secondary">
+                Làm mới
+            </a>
+        </div>
+
+        <!-- FLASH / ERROR MESSAGES -->
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <!-- FORM -->
+        <form method="post"
+              action="/patient/appointments/save"
+              novalidate>
+
+            <!-- Specialty -->
+            <div class="mb-3">
+                <label class="form-label">
+                    Chuyên khoa
+                </label>
+
+                <select class="form-select"
+                        name="specialtyId">
+
+                    <option value="">
+                        -- Chọn chuyên khoa --
+                    </option>
+
+                    <option th:each="s : ${specialties}"
+                            th:value="${s.id}"
+                            th:text="${s.name}">
+                    </option>
+
+                </select>
+            </div>
+
+            <!-- Doctor -->
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Bác sĩ
+                </label>
+
+                <select class="form-select"
+                        name="doctorId">
+
+                    <option value="">
+                        -- Chọn bác sĩ --
+                    </option>
+
+                    <option th:each="d : ${doctors}"
+                            th:value="${d.id}"
+                            th:text="${d.fullName}">
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- Date -->
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Ngày khám
+                </label>
+
+                <input type="date"
+                       class="form-control"
+                       name="appointmentDate">
+
+            </div>
+
+            <!-- Time -->
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Giờ khám
+                </label>
+
+                <input type="time"
+                       class="form-control"
+                       name="appointmentTime">
+
+            </div>
+
+            <!-- Symptoms -->
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Triệu chứng
+                </label>
+
+                <textarea class="form-control"
+                          name="symptoms"
+                          rows="4"
+                          placeholder="Nhập triệu chứng hiện tại..."></textarea>
+
+            </div>
+
+            <!-- BUTTON -->
+            <button class="btn btn-primary"
+                    type="submit">
+
+                <i class="fa-solid fa-calendar-check"></i>
+                Đặt lịch
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- LIST -->
+    <div class="card shadow p-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h2 class="text-primary fw-bold m-0">
+                Lịch khám của tôi
+            </h2>
+
+        </div>
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark">
+
+            <tr>
+
+                <th>Bác sĩ</th>
+
+                <th>Ngày khám</th>
+
+                <th>Giờ khám</th>
+
+                <th>Triệu chứng</th>
+
+                <th>Trạng thái</th>
+
+                <th width="220px">
+                    Hành động
+                </th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr th:each="a : ${appointments}">
+
+                <td th:text="${a.doctor.fullName}"></td>
+
+                <td th:text="${a.appointmentDate}"></td>
+
+                <td th:text="${a.appointmentTime}"></td>
+
+                <td th:text="${a.symptoms}"></td>
+
+                <td>
+
+                    <span class="badge bg-secondary"
+                          th:if="${a.status == 'UNPAID'}">
+
+                        UNPAID
+
+                    </span>
+
+                    <span class="badge bg-warning"
+                          th:if="${a.status == 'PENDING'}">
+
+                        PENDING
+
+                    </span>
+
+                    <span class="badge bg-success"
+                          th:if="${a.status == 'COMPLETED'}">
+
+                        COMPLETED
+
+                    </span>
+
+                    <span class="badge bg-danger"
+                          th:if="${a.status == 'CANCELLED'}">
+
+                        CANCELLED
+
+                    </span>
+
+                </td>
+
+                <td class="d-flex gap-2">
+
+                    <!-- Pay button -->
+                    <a class="btn btn-primary btn-sm"
+                       th:if="${a.status == 'UNPAID'}"
+                       th:href="@{/patient/payment/{id}(id=${a.id})}">
+
+                        <i class="fa-solid fa-qrcode"></i>
+                        Thanh toán
+
+                    </a>
+
+                    <!-- Cancel -->
+                    <form method="post"
+                          th:if="${a.status == 'PENDING'}"
+                          th:action="@{/patient/appointments/cancel/{id}(id=${a.id})}">
+
+                        <button class="btn btn-danger btn-sm"
+                                type="submit">
+
+                            <i class="fa-solid fa-xmark"></i>
+                            Hủy lịch
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(appointments)}">
+
+                <td colspan="6"
+                    class="text-center text-muted py-4">
+
+                    Chưa có lịch khám nào
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

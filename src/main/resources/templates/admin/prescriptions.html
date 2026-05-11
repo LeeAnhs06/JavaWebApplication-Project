@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cấp phát thuốc</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>    body {
+        background: #f4f7fb;
+        margin: 0;
+    }
+
+    .sidebar-wrapper {
+        position: fixed;
+        width: 250px;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        z-index: 1100; /* FIX: sidebar luôn nằm trên */
+    }
+
+    .main-content {
+        margin-left: 250px;
+        padding: 40px;
+        position: relative; /* FIX: tránh bị chồng lớp weird */
+        z-index: 1;
+        min-height: 100vh;
+        overflow-x: auto; /* FIX: nếu bảng rộng thì scroll ngang, không tràn đè sidebar */
+    }
+
+    .card {
+        border: none;
+        border-radius: 20px;
+    }
+
+    .table {
+        vertical-align: middle;
+        background: #fff;
+    }
+
+    .badge {
+        padding: 10px 14px;
+        font-size: 14px;
+    }</style>
+
+</head>
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar-wrapper">
+
+    <div th:replace="~{fragments/admin-sidebar :: sidebar}">
+    </div>
+
+</div>
+
+<!-- MAIN CONTENT -->
+
+<div class="main-content">
+
+    <div class="card shadow p-5">
+
+        <!-- HEADER -->
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h2 class="text-primary fw-bold m-0">
+                Cấp phát thuốc
+            </h2>
+
+            <a href="/admin/prescriptions"
+               class="btn btn-secondary">
+
+                Làm mới
+
+            </a>
+
+        </div>
+
+        <!-- ERROR -->
+
+        <div class="alert alert-danger"
+             th:if="${error}"
+             th:text="${error}">
+        </div>
+
+        <!-- SUCCESS -->
+
+        <div class="alert alert-success"
+             th:if="${success}"
+             th:text="${success}">
+        </div>
+
+        <!-- TABLE -->
+
+        <table class="table table-bordered table-hover bg-white">
+
+            <thead class="table-dark">
+
+            <tr>
+
+                <th>ID</th>
+
+                <th>Bệnh nhân</th>
+
+                <th>Thuốc</th>
+
+                <th>Trạng thái</th>
+
+                <th width="240px">
+                    Hành động
+                </th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr th:each="p : ${prescriptions}">
+
+                <!-- ID -->
+
+                <td th:text="${p.id}">
+                </td>
+
+                <!-- PATIENT -->
+
+                <td th:text="${p.medicalRecord.appointment.patient.fullName}">
+                </td>
+
+                <!-- MEDICINES -->
+
+                <td>
+
+                    <div th:each="d : ${p.details}"
+                         class="mb-2">
+
+                        <span class="fw-semibold"
+                              th:text="${d.medicine.name}">
+                        </span>
+
+                        -
+
+                        SL:
+                        <span th:text="${d.quantity}">
+                        </span>
+
+                        <br>
+
+                        <small class="text-muted">
+
+                            Stock:
+                            <span th:text="${d.medicine.stock}">
+                            </span>
+
+                        </small>
+
+                    </div>
+
+                </td>
+
+                <!-- STATUS -->
+
+                <td>
+
+                    <span class="badge bg-warning"
+                          th:if="${p.status == 'PENDING'}">
+
+                        PENDING
+
+                    </span>
+
+                    <span class="badge bg-success"
+                          th:if="${p.status == 'DISPENSED'}">
+
+                        DISPENSED
+
+                    </span>
+
+                </td>
+
+                <!-- ACTION -->
+
+                <td>
+
+                    <form method="post"
+                          th:action="@{/admin/prescriptions/dispense/{id}(id=${p.id})}">
+
+                        <button class="btn btn-success btn-sm"
+                                th:disabled="${p.status != 'PENDING'}">
+
+                            <i class="fa-solid fa-capsules"></i>
+                            Xác nhận phát thuốc
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            <!-- EMPTY -->
+
+            <tr th:if="${#lists.isEmpty(prescriptions)}">
+
+                <td colspan="5"
+                    class="text-center text-muted py-4">
+
+                    Không có đơn thuốc nào
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

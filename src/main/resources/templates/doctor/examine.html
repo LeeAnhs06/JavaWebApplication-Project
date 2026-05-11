@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Khám bệnh</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+        body{ background:#f4f7fb; overflow-x:hidden; }
+        .sidebar-wrapper{ position:fixed; top:0; left:0; width:260px; height:100vh; z-index:1000; }
+        .main-content{ margin-left:260px; padding:40px; min-height:100vh; }
+        .card{ border:none; border-radius:20px; }
+        .medicine-row{
+            background:#f8f9fa;
+            border:1px solid #e6e6e6;
+            border-radius:12px;
+            padding:12px;
+            margin-bottom:12px;
+        }
+        @media(max-width:768px){
+            .sidebar-wrapper{ position:relative; width:100%; height:auto; }
+            .main-content{ margin-left:0; padding:20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-wrapper">
+    <div th:replace="~{fragments/doctor-sidebar :: sidebar}"></div>
+</div>
+
+<div class="main-content">
+    <div class="card shadow p-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary m-0">Khám bệnh</h2>
+            <a href="/doctor/appointments" class="btn btn-secondary">Quay lại</a>
+        </div>
+
+        <!-- ERROR (đỏ) từ backend -->
+        <div class="alert alert-danger"
+             th:if="${error}"
+             role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <form method="post" action="/doctor/examine/save" novalidate>
+
+            <input type="hidden" name="appointmentId" th:value="${appointment.id}">
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Triệu chứng</label>
+                <textarea name="symptoms"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Nhập triệu chứng..."></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Chẩn đoán</label>
+                <textarea name="diagnosis"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Nhập chẩn đoán..."></textarea>
+            </div>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-semibold m-0">Kê thuốc</label>
+
+                    <button type="button" class="btn btn-success btn-sm" id="btnAddMedicine">
+                        <i class="fa-solid fa-plus"></i>
+                        Thêm thuốc
+                    </button>
+                </div>
+
+                <div class="text-muted mb-3">
+                    Nếu bạn không kê thuốc thì để trống phần này.
+                </div>
+
+                <div id="medicineContainer"></div>
+
+                <template id="medicineRowTemplate">
+                    <div class="medicine-row">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-7">
+                                <select class="form-select" name="medicineIds">
+                                    <option value="">-- Chọn thuốc --</option>
+                                    <option th:each="m : ${medicines}"
+                                            th:value="${m.id}"
+                                            th:text="${m.name}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <input type="number"
+                                       class="form-control"
+                                       name="quantities"
+                                       min="1"
+                                       step="1"
+                                       value="1"
+                                       placeholder="Số lượng">
+                            </div>
+
+                            <div class="col-md-2 d-grid">
+                                <button type="button" class="btn btn-outline-danger btnRemoveMedicine">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <button class="btn btn-primary px-4" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Lưu kết quả khám
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('medicineContainer');
+    const tpl = document.getElementById('medicineRowTemplate');
+    const btnAdd = document.getElementById('btnAddMedicine');
+
+    function addMedicineRow() {
+        const node = tpl.content.cloneNode(true);
+        const row = node.querySelector('.medicine-row');
+
+        row.querySelector('.btnRemoveMedicine').addEventListener('click', () => {
+            row.remove();
+        });
+
+        container.appendChild(node);
+    }
+
+    btnAdd.addEventListener('click', addMedicineRow);
+</script>
+
+</body>
+</html>
