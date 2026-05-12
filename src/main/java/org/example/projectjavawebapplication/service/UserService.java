@@ -10,10 +10,8 @@ public interface UserService {
 
     User findByUsername(String username);
 
-    // CORE-01: chỉ dùng cho đăng ký (hash password)
     void register(User user);
 
-    // CORE-03: update profile không đụng password
     void updateProfile(User user);
 
     User getById(Long id);

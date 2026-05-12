@@ -14,7 +14,7 @@ public class MainController {
     @Autowired
     private UserService userService;
 
-    // ================= HOME =================
+    // trang chủ
 
     @GetMapping("/")
     public String home() {
@@ -22,7 +22,7 @@ public class MainController {
         return "home";
     }
 
-    // ================= LOGIN =================
+    // đăng nhập
 
     @GetMapping("/login")
     public String loginPage() {
@@ -100,7 +100,7 @@ public class MainController {
         return "auth/login";
     }
 
-    // ================= REGISTER =================
+    // đăng ký
 
     @GetMapping("/register")
     public String registerPage() {
@@ -209,7 +209,7 @@ public class MainController {
         return "auth/login";
     }
 
-    // ================= PATIENT =================
+    // bệnh nhân
 
     @GetMapping("/patient")
     public String patientPage(
@@ -228,7 +228,7 @@ public class MainController {
         return "patient/dashboard";
     }
 
-    // ================= DOCTOR =================
+    // kiểm tra doctor
 
     @GetMapping("/doctor")
     public String doctorPage(
@@ -247,7 +247,7 @@ public class MainController {
         return "doctor/dashboard";
     }
 
-    // ================= LOGOUT =================
+    // đăng xuát
 
     @GetMapping("/logout")
     public String logout(

@@ -35,7 +35,7 @@ public class PatientController {
     @Autowired
     private MedicalRecordService medicalRecordService;
 
-    // ================= DASHBOARD =================
+    // dashboard
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session) {
@@ -49,7 +49,7 @@ public class PatientController {
         return "patient/dashboard";
     }
 
-    // ================= PROFILE =================
+    // profile
 
     @GetMapping("/profile")
     public String profile(HttpSession session, Model model) {
@@ -65,7 +65,7 @@ public class PatientController {
         return "patient/profile";
     }
 
-    // ================= UPDATE PROFILE =================
+    // cập nhật thông tin cá nhân
 
     @PostMapping("/profile/update")
     public String updateProfile(User formUser, HttpSession session) {
@@ -87,7 +87,7 @@ public class PatientController {
         return "redirect:/patient/profile";
     }
 
-    // ================= APPOINTMENTS PAGE (BOOK + LIST) =================
+    // trang đặt lịch
 
     @GetMapping("/appointments")
     public String appointmentsPage(HttpSession session, Model model) {
@@ -120,8 +120,7 @@ public class PatientController {
         return "redirect:/patient/appointments";
     }
 
-    // ================= SAVE APPOINTMENT =================
-    // ✅ validate required fields bằng backend (không dùng required HTML5)
+    // đặt lịch khám mới
 
     @PostMapping("/appointments/save")
     public String saveAppointment(
@@ -138,7 +137,7 @@ public class PatientController {
             return "redirect:/login";
         }
 
-        // ===== validate required =====
+        // validate required
         if (specialtyId == null) {
             model.addAttribute("error", "Vui lòng chọn chuyên khoa");
             return reloadAppointmentPageWithError(patient, appointment, model);
@@ -159,7 +158,7 @@ public class PatientController {
             return reloadAppointmentPageWithError(patient, appointment, model);
         }
 
-        // ===== load specialty =====
+        // load specialty
         var specialty = specialtyService.getById(specialtyId);
         if (specialty == null) {
             model.addAttribute("error", "Chuyên khoa không hợp lệ");
@@ -167,7 +166,7 @@ public class PatientController {
         }
         appointment.setSpecialty(specialty);
 
-        // ===== load doctor =====
+        // load doctor
         User doctor = userService.getById(doctorId);
         if (doctor == null || !"DOCTOR".equals(doctor.getRole())) {
             model.addAttribute("error", "Bác sĩ không hợp lệ");
@@ -175,7 +174,7 @@ public class PatientController {
         }
         appointment.setDoctor(doctor);
 
-        // ===== validate date/time =====
+        // validate date/time
         if (appointment.getAppointmentDate().isBefore(LocalDate.now())) {
             model.addAttribute("error", "Không thể đặt lịch trong quá khứ");
             return reloadAppointmentPageWithError(patient, appointment, model);
@@ -187,7 +186,7 @@ public class PatientController {
             return reloadAppointmentPageWithError(patient, appointment, model);
         }
 
-        // ===== check duplicate slot =====
+        // kiểm tra bác sĩ đã có lịch khám giờ này chưa
         boolean booked = appointmentService.isDoctorBooked(
                 appointment.getDoctor(),
                 appointment.getAppointmentDate(),
@@ -201,17 +200,16 @@ public class PatientController {
 
         appointment.setPatient(patient);
 
-        // ✅ vừa đặt lịch xong -> chưa thanh toán
+        // vừa đặt lịch xong -> chưa thanh toán
         appointment.setStatus("UNPAID");
 
         appointmentService.save(appointment);
 
-        // ✅ chuyển sang trang thanh toán
+        // chuyển sang trang thanh toán
         return "redirect:/patient/payment/" + appointment.getId();
     }
 
-    // ================= CANCEL APPOINTMENT (CORE-09) =================
-    // ✅ chỉ cho hủy PENDING và phải trước 24h
+    // hủy lịch
 
     @PostMapping("/appointments/cancel/{id}")
     public String cancelAppointment(
@@ -258,8 +256,7 @@ public class PatientController {
         return "redirect:/patient/appointments";
     }
 
-    // ================= PAYMENT PAGE =================
-    // ✅ giá fix cứng 500000 + QR
+    // trang thanh toán
 
     @GetMapping("/payment/{id}")
     public String paymentPage(
@@ -282,7 +279,7 @@ public class PatientController {
             return "redirect:/patient/appointments";
         }
 
-        int amount = 500000; // ✅ FIX CỨNG 500000
+        int amount = 500000;
 
         String qrData = "PAY|" + appointment.getId() + "|" + amount;
 
@@ -296,7 +293,7 @@ public class PatientController {
         return "patient/payment";
     }
 
-    // ================= CONFIRM PAYMENT =================
+    // xác nhận thanh toán
 
     @PostMapping("/payment/confirm/{id}")
     public String confirmPayment(
@@ -324,7 +321,7 @@ public class PatientController {
             return "redirect:/patient/appointments";
         }
 
-        // ✅ thanh toán xong -> chờ khám
+        // thanh toán xong -> chờ khám
         appointment.setStatus("PENDING");
         appointmentService.save(appointment);
 
@@ -332,7 +329,7 @@ public class PatientController {
         return "redirect:/patient/appointments";
     }
 
-    // ================= HISTORY =================
+    // lịch sử
 
     @GetMapping("/history")
     public String history(HttpSession session, Model model) {
@@ -348,7 +345,7 @@ public class PatientController {
         return "patient/history";
     }
 
-    // ================= HISTORY DETAIL =================
+    // detail lich sử
 
     @GetMapping("/history/{id}")
     public String historyDetail(@PathVariable Long id, HttpSession session, Model model) {
@@ -366,7 +363,6 @@ public class PatientController {
         return "patient/history-detail";
     }
 
-    // ================= HELPERS =================
 
     private String reloadAppointmentPageWithError(User patient, Appointment appointment, Model model) {
 

@@ -11,7 +11,7 @@ import java.util.List;
 public interface AppointmentRepository
         extends JpaRepository<Appointment, Long> {
 
-    // ================= CHECK DUPLICATE =================
+    // kiểm tra trùng
 
     boolean existsByDoctorAndAppointmentDateAndAppointmentTimeAndStatusNot(
             User doctor,
@@ -20,22 +20,23 @@ public interface AppointmentRepository
             String status
     );
 
-    // ================= PATIENT =================
+    // bệnh nhân
 
     List<Appointment> findByPatient(
             User patient
     );
 
-    // ================= DOCTOR =================
+    // bác sĩ
 
     List<Appointment> findByDoctor(
             User doctor
     );
 
-    // ================= STATUS =================
+    // trạng thái
 
     List<Appointment> findByStatus(
             String status
     );
+
     List<Appointment> findByDoctorAndStatus(User doctor, String status);
 }

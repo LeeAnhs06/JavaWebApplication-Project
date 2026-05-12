@@ -24,21 +24,21 @@ public class AppointmentServiceImpl
         appointmentRepository.save(appointment);
     }
 
-@Override
-public boolean isDoctorBooked(
-        User doctor,
-        LocalDate date,
-        LocalTime time
-) {
+    @Override
+    public boolean isDoctorBooked(
+            User doctor,
+            LocalDate date,
+            LocalTime time
+    ) {
 
-    return appointmentRepository
-            .existsByDoctorAndAppointmentDateAndAppointmentTimeAndStatusNot(
-                    doctor,
-                    date,
-                    time,
-                    "CANCELLED"
-            );
-}
+        return appointmentRepository
+                .existsByDoctorAndAppointmentDateAndAppointmentTimeAndStatusNot(
+                        doctor,
+                        date,
+                        time,
+                        "CANCELLED"
+                );
+    }
 
     @Override
     public List<Appointment> getPatientAppointments(
@@ -66,26 +66,29 @@ public boolean isDoctorBooked(
     }
 
     @Override
-public List<Appointment> findByPatient(User patient) {
+    public List<Appointment> findByPatient(User patient) {
 
-    return appointmentRepository
-            .findByPatient(patient);
-}
-@Override
-public List<Appointment> findPendingAppointments() {
+        return appointmentRepository
+                .findByPatient(patient);
+    }
 
-    return appointmentRepository.findByStatus("PENDING");
-}
-@Override
-public Appointment getById(Long id) {
+    @Override
+    public List<Appointment> findPendingAppointments() {
 
-    return appointmentRepository
-            .findById(id)
-            .orElse(null);
-}
-@Override
-public List<Appointment> findPendingAppointmentsByDoctor(User doctor) {
-    return appointmentRepository.findByDoctorAndStatus(doctor, "PENDING");
-}
+        return appointmentRepository.findByStatus("PENDING");
+    }
+
+    @Override
+    public Appointment getById(Long id) {
+
+        return appointmentRepository
+                .findById(id)
+                .orElse(null);
+    }
+
+    @Override
+    public List<Appointment> findPendingAppointmentsByDoctor(User doctor) {
+        return appointmentRepository.findByDoctorAndStatus(doctor, "PENDING");
+    }
 
 }

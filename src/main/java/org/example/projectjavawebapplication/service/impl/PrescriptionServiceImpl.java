@@ -22,7 +22,7 @@ public class PrescriptionServiceImpl
     private PrescriptionDetailRepository
             detailRepository;
 
-    // ================= SAVE PRESCRIPTION =================
+    // save
 
     @Override
     public void save(
@@ -34,7 +34,7 @@ public class PrescriptionServiceImpl
         );
     }
 
-    // ================= SAVE DETAIL =================
+    // save detail
 
     @Override
     public void saveDetail(
@@ -46,7 +46,7 @@ public class PrescriptionServiceImpl
         );
     }
 
-    // ================= GET BY ID =================
+    // get by id
 
     @Override
     public Prescription getById(
@@ -58,7 +58,7 @@ public class PrescriptionServiceImpl
                 .orElse(null);
     }
 
-    // ================= PENDING PRESCRIPTIONS =================
+    // pending prescriptions
 
     @Override
     public List<Prescription>
@@ -68,7 +68,7 @@ public class PrescriptionServiceImpl
                 .findByStatus("PENDING");
     }
 
-    // ================= DETAILS =================
+    // details
 
     @Override
     public List<PrescriptionDetail>

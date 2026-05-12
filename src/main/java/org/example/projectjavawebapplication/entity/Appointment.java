@@ -32,15 +32,15 @@ public class Appointment {
     private String status;
 
     @Column(columnDefinition = "TEXT")
-private String symptoms;
+    private String symptoms;
 
     public String getSymptoms() {
-    return symptoms;
-}
+        return symptoms;
+    }
 
-public void setSymptoms(String symptoms) {
-    this.symptoms = symptoms;
-}
+    public void setSymptoms(String symptoms) {
+        this.symptoms = symptoms;
+    }
 
     public Long getId() {
         return id;

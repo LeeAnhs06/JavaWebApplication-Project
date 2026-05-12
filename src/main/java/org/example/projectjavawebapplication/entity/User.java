@@ -21,7 +21,6 @@ public class User {
 
     private Boolean status = true;
 
-    // profile
 
     private String fullName;
 

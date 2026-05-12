@@ -16,21 +16,21 @@ public class ProjectJavaWebApplication {
 
 
     @Bean
-    CommandLineRunner init(UserRepository userRepository){
+    CommandLineRunner init(UserRepository userRepository) {
 
-    return args -> {
+        return args -> {
 
-        if(userRepository.findByUsername("admin")==null){
+            if (userRepository.findByUsername("admin") == null) {
 
-            User admin = new User();
+                User admin = new User();
 
-            admin.setUsername("admin");
-            admin.setPassword("123456");
-            admin.setRole("ADMIN");
+                admin.setUsername("admin");
+                admin.setPassword("123456");
+                admin.setRole("ADMIN");
 
-            userRepository.save(admin);
-        }
+                userRepository.save(admin);
+            }
 
-    };
-}
+        };
+    }
 }

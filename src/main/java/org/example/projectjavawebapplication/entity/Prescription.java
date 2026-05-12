@@ -19,11 +19,9 @@ public class Prescription {
     @OneToMany(mappedBy = "prescription")
     private List<PrescriptionDetail> details;
 
-    // NEW
 
     private String status = "PENDING";
 
-    // ================= GET SET =================
 
     public Long getId() {
         return id;
@@ -53,7 +51,6 @@ public class Prescription {
         this.details = details;
     }
 
-    // NEW
 
     public String getStatus() {
         return status;

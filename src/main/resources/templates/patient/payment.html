@@ -45,7 +45,13 @@
                     <button type="submit" class="btn btn-success">
                         Xác nhận thanh toán
                     </button>
-
+                    <form method="post"
+                          th:action="@{/patient/payment/cancel/{id}(id=${appointment.id})}">
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Hủy lịch
+                        </button>
+                    </form>
                     <a href="/patient/appointments" class="btn btn-secondary ms-2">
                         Quay lại
                     </a>

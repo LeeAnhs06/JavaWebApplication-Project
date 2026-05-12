@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+
 import org.example.projectjavawebapplication.entity.Prescription;
 import org.example.projectjavawebapplication.entity.PrescriptionDetail;
 import org.example.projectjavawebapplication.service.PrescriptionService;
@@ -26,9 +28,9 @@ public class AdminController {
     private UserService userService;
 
     @Autowired
-private PrescriptionService prescriptionService;
+    private PrescriptionService prescriptionService;
 
-    // ================= CHECK ADMIN =================
+    // check role
 
     private boolean isAdmin(HttpSession session) {
 
@@ -39,7 +41,7 @@ private PrescriptionService prescriptionService;
                 user.getRole().equals("ADMIN");
     }
 
-    // ================= DASHBOARD =================
+    // dashboard
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session) {
@@ -51,7 +53,7 @@ private PrescriptionService prescriptionService;
         return "admin/dashboard";
     }
 
-    // ================= PROFILE =================
+    // profile
 
     @GetMapping("/profile")
     public String profile(
@@ -137,7 +139,7 @@ private PrescriptionService prescriptionService;
         return "admin/profile";
     }
 
-    // ================= MEDICINE LIST =================
+    // medicine list
 
     @GetMapping("/medicines")
     public String medicines(
@@ -157,7 +159,7 @@ private PrescriptionService prescriptionService;
         return "admin/medicine/medicine-list";
     }
 
-    // ================= ADD FORM =================
+    // add form
 
     @GetMapping("/medicines/add")
     public String addForm(
@@ -177,7 +179,7 @@ private PrescriptionService prescriptionService;
         return "admin/medicine/medicine-form";
     }
 
-    // ================= SAVE =================
+    // save - add edit
 
     @PostMapping("/medicines/save")
     public String saveMedicine(
@@ -238,7 +240,7 @@ private PrescriptionService prescriptionService;
         return "redirect:/admin/medicines";
     }
 
-    // ================= EDIT =================
+    // edit
 
     @GetMapping("/medicines/edit/{id}")
     public String editForm(
@@ -262,7 +264,7 @@ private PrescriptionService prescriptionService;
         return "admin/medicine/medicine-form";
     }
 
-    // ================= DELETE =================
+    // delete
 
     @GetMapping("/medicines/delete/{id}")
     public String deleteMedicine(
@@ -278,53 +280,54 @@ private PrescriptionService prescriptionService;
 
         return "redirect:/admin/medicines";
     }
-    // ================= TEST TYPES (READ-ONLY) =================
-@GetMapping("/test-types")
-public String testTypes(HttpSession session, Model model) {
 
-    if (!isAdmin(session)) {
-        return "redirect:/login";
+    // dữ liệu mẫu
+    @GetMapping("/test-types")
+    public String testTypes(HttpSession session, Model model) {
+
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+
+
+        List<String> testTypes = List.of(
+                "Xét nghiệm máu tổng quát",
+                "Xét nghiệm đường huyết",
+                "Xét nghiệm mỡ máu",
+                "Xét nghiệm chức năng gan",
+                "Xét nghiệm chức năng thận",
+                "Xét nghiệm nước tiểu",
+                "Xét nghiệm viêm gan B",
+                "Xét nghiệm viêm gan C"
+        );
+
+        model.addAttribute("testTypes", testTypes);
+
+        return "admin/test-types";
+    }
+// danh sách đơn thuốc chờ duyệt
+
+    @GetMapping("/prescriptions")
+    public String prescriptions(
+            HttpSession session,
+            Model model
+    ) {
+
+        if (!isAdmin(session)) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute(
+                "prescriptions",
+                prescriptionService.getPendingPrescriptions()
+        );
+
+        return "admin/prescriptions";
     }
 
-    // Hardcode list để "làm màu" (CORE-04)
-    List<String> testTypes = List.of(
-            "Xét nghiệm máu tổng quát",
-            "Xét nghiệm đường huyết",
-            "Xét nghiệm mỡ máu",
-            "Xét nghiệm chức năng gan",
-            "Xét nghiệm chức năng thận",
-            "Xét nghiệm nước tiểu",
-            "Xét nghiệm viêm gan B",
-            "Xét nghiệm viêm gan C"
-    );
+// dispense thuốc
 
-    model.addAttribute("testTypes", testTypes);
-
-    return "admin/test-types";
-}
-// ================= PRESCRIPTIONS =================
-
-@GetMapping("/prescriptions")
-public String prescriptions(
-        HttpSession session,
-        Model model
-) {
-
-    if (!isAdmin(session)) {
-        return "redirect:/login";
-    }
-
-    model.addAttribute(
-            "prescriptions",
-            prescriptionService.getPendingPrescriptions()
-    );
-
-    return "admin/prescriptions";
-}
-
-// ================= DISPENSE MEDICINE =================
-
-@PostMapping("/prescriptions/dispense/{id}")
+   @PostMapping("/prescriptions/dispense/{id}")
 public String dispenseMedicine(
         @PathVariable Long id,
         HttpSession session,
@@ -335,66 +338,57 @@ public String dispenseMedicine(
         return "redirect:/login";
     }
 
-    Prescription prescription =
-            prescriptionService.getById(id);
-
+    Prescription prescription = prescriptionService.getById(id);
     if (prescription == null) {
-
+        return "redirect:/admin/prescriptions";
+    }
+    if (!"PENDING".equals(prescription.getStatus())) {
         return "redirect:/admin/prescriptions";
     }
 
-    // CHECK STOCK
+    List<PrescriptionDetail> details = prescriptionService.getDetails(prescription);
 
-    for (PrescriptionDetail detail
-            : prescription.getDetails()) {
+    // validate: đơn phải có thuốc
+    if (details == null || details.isEmpty()) {
+        model.addAttribute("error", "Đơn thuốc không có thuốc để cấp phát");
+        model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
+        return "admin/prescriptions";
+    }
 
-        Medicine medicine =
-                detail.getMedicine();
+    for (PrescriptionDetail detail : details) {
 
-        if (medicine.getStock()
-                < detail.getQuantity()) {
+        Medicine medicine = detail.getMedicine();
+        if (medicine == null) {
+            model.addAttribute("error", "Thuốc không hợp lệ");
+            model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
+            return "admin/prescriptions";
+        }
 
+        if (detail.getQuantity() == null || detail.getQuantity() <= 0) {
+            model.addAttribute("error", "Số lượng thuốc không hợp lệ");
+            model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
+            return "admin/prescriptions";
+        }
+
+        if (medicine.getStock() < detail.getQuantity()) {
             model.addAttribute(
                     "error",
-                    "Thuốc "
-                            + medicine.getName()
-                            + " không đủ số lượng"
+                    "Thuốc " + medicine.getName() + " không đủ số lượng"
             );
-
-            model.addAttribute(
-                    "prescriptions",
-                    prescriptionService.getPendingPrescriptions()
-            );
-
+            model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
             return "admin/prescriptions";
         }
     }
-
-    // SUBTRACT STOCK
-
-    for (PrescriptionDetail detail
-            : prescription.getDetails()) {
-
-        Medicine medicine =
-                detail.getMedicine();
-
-        medicine.setStock(
-                medicine.getStock()
-                        - detail.getQuantity()
-        );
-
+    
+    for (PrescriptionDetail detail : details) {
+        Medicine medicine = detail.getMedicine();
+        medicine.setStock(medicine.getStock() - detail.getQuantity());
         medicineService.save(medicine);
     }
 
-    // UPDATE STATUS
-
-    prescription.setStatus(
-            "DISPENSED"
-    );
-
-    prescriptionService.save(
-            prescription
-    );
+    // đổi trạng thái
+    prescription.setStatus("DISPENSED");
+    prescriptionService.save(prescription);
 
     return "redirect:/admin/prescriptions";
 }

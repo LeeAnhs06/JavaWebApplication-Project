@@ -27,7 +27,7 @@ public class DoctorController {
     @Autowired
     private MedicineService medicineService;
 
-    // ================= DASHBOARD =================
+    // dashboard
 
     @GetMapping("/dashboard")
     public String doctorDashboard(
@@ -46,7 +46,7 @@ public class DoctorController {
         return "doctor/dashboard";
     }
 
-    // ================= PROFILE =================
+    // profile
 
     @GetMapping("/profile")
     public String doctorProfile(
@@ -71,7 +71,7 @@ public class DoctorController {
         return "doctor/profile";
     }
 
-    // ================= UPDATE PROFILE =================
+    // update profile
 
     @PostMapping("/profile/update")
     public String updateProfile(
@@ -109,26 +109,26 @@ public class DoctorController {
         return "redirect:/doctor/profile";
     }
 
-    // ================= APPOINTMENTS =================
+    // appointments
 
-@GetMapping("/appointments")
-public String appointments(HttpSession session, Model model) {
+    @GetMapping("/appointments")
+    public String appointments(HttpSession session, Model model) {
 
-    User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("user");
 
-    if (user == null || !user.getRole().equals("DOCTOR")) {
-        return "redirect:/login";
+        if (user == null || !user.getRole().equals("DOCTOR")) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute(
+                "appointments",
+                appointmentService.findPendingAppointmentsByDoctor(user) // thêm method này
+        );
+
+        return "doctor/appointments";
     }
 
-    model.addAttribute(
-            "appointments",
-            appointmentService.findPendingAppointmentsByDoctor(user) // thêm method này
-    );
-
-    return "doctor/appointments";
-}
-
-    // ================= EXAM FORM =================
+    // examine form
 
     @GetMapping("/examine/{id}")
     public String examineForm(
@@ -159,173 +159,193 @@ public String appointments(HttpSession session, Model model) {
         return "doctor/examine";
     }
 
-    // ================= SAVE EXAM =================
+    // luu form
 
-@PostMapping("/examine/save")
-public String saveExam(
-        @RequestParam Long appointmentId,
-        @RequestParam(required = false) String symptoms,
-        @RequestParam(required = false) String diagnosis,
-        @RequestParam(value = "medicineIds", required = false) Long[] medicineIds,
-        @RequestParam(value = "quantities", required = false) Integer[] quantities,
-        HttpSession session,
-        Model model
-) {
+    @PostMapping("/examine/save")
+    public String saveExam(
+            @RequestParam Long appointmentId,
+            @RequestParam(required = false) String symptoms,
+            @RequestParam(required = false) String diagnosis,
+            @RequestParam(value = "medicineIds", required = false) Long[] medicineIds,
+            @RequestParam(value = "quantities", required = false) Integer[] quantities,
+            HttpSession session,
+            Model model
+    ) {
 
-    User doctor = (User) session.getAttribute("user");
-    if (doctor == null || !"DOCTOR".equals(doctor.getRole())) {
-        return "redirect:/login";
-    }
+        User doctor = (User) session.getAttribute("user");
+        if (doctor == null || !"DOCTOR".equals(doctor.getRole())) {
+            return "redirect:/login";
+        }
 
-    Appointment appointment = appointmentService.getById(appointmentId);
-    if (appointment == null) {
-        return "redirect:/doctor/appointments";
-    }
+        Appointment appointment = appointmentService.getById(appointmentId);
+        if (appointment == null) {
+            return "redirect:/doctor/appointments";
+        }
 
-    // chỉ khám lịch của chính mình
-    if (appointment.getDoctor() == null ||
-            !appointment.getDoctor().getId().equals(doctor.getId())) {
-        return "redirect:/doctor/appointments";
-    }
+        // chỉ khám lịch của chính mình
+        if (appointment.getDoctor() == null ||
+                !appointment.getDoctor().getId().equals(doctor.getId())) {
+            return "redirect:/doctor/appointments";
+        }
 
-    // chỉ khám khi còn PENDING
-    if (!"PENDING".equals(appointment.getStatus())) {
-        return "redirect:/doctor/appointments";
-    }
+        // chỉ khám khi còn PENDING
+        if (!"PENDING".equals(appointment.getStatus())) {
+            return "redirect:/doctor/appointments";
+        }
 
-    // ===== VALIDATE REQUIRED FIELDS =====
-    if (symptoms == null || symptoms.trim().isEmpty()) {
-        model.addAttribute("error", "Triệu chứng không được để trống");
-        model.addAttribute("appointment", appointment);
-        model.addAttribute("medicines", medicineService.getAll());
-        return "doctor/examine";
-    }
-
-    if (diagnosis == null || diagnosis.trim().isEmpty()) {
-        model.addAttribute("error", "Chẩn đoán không được để trống");
-        model.addAttribute("appointment", appointment);
-        model.addAttribute("medicines", medicineService.getAll());
-        return "doctor/examine";
-    }
-
-    // Nếu có chọn thuốc thì quantity phải hợp lệ (>0)
-    if (medicineIds != null) {
-        if (quantities == null || quantities.length < medicineIds.length) {
-            model.addAttribute("error", "Vui lòng nhập đầy đủ số lượng cho các thuốc đã chọn");
+        // validate form
+        if (symptoms == null || symptoms.trim().isEmpty()) {
+            model.addAttribute("error", "Triệu chứng không được để trống");
             model.addAttribute("appointment", appointment);
             model.addAttribute("medicines", medicineService.getAll());
             return "doctor/examine";
         }
 
-        for (int i = 0; i < medicineIds.length; i++) {
-            if (medicineIds[i] == null) {
-                model.addAttribute("error", "Thuốc không hợp lệ");
+        if (diagnosis == null || diagnosis.trim().isEmpty()) {
+            model.addAttribute("error", "Chẩn đoán không được để trống");
+            model.addAttribute("appointment", appointment);
+            model.addAttribute("medicines", medicineService.getAll());
+            return "doctor/examine";
+        }
+
+        // Nếu có chọn thuốc thì quantity phải hợp lệ (>0)
+        if (medicineIds != null) {
+            if (quantities == null || quantities.length < medicineIds.length) {
+                model.addAttribute("error", "Vui lòng nhập đầy đủ số lượng cho các thuốc đã chọn");
                 model.addAttribute("appointment", appointment);
                 model.addAttribute("medicines", medicineService.getAll());
                 return "doctor/examine";
             }
 
-            Integer q = quantities[i];
-            if (q == null || q <= 0) {
-                model.addAttribute("error", "Số lượng thuốc phải > 0");
-                model.addAttribute("appointment", appointment);
-                model.addAttribute("medicines", medicineService.getAll());
-                return "doctor/examine";
+            for (int i = 0; i < medicineIds.length; i++) {
+                if (medicineIds[i] == null) {
+                    model.addAttribute("error", "Thuốc không hợp lệ");
+                    model.addAttribute("appointment", appointment);
+                    model.addAttribute("medicines", medicineService.getAll());
+                    return "doctor/examine";
+                }
+
+                Integer q = quantities[i];
+                if (q == null || q <= 0) {
+                    model.addAttribute("error", "Số lượng thuốc phải > 0");
+                    model.addAttribute("appointment", appointment);
+                    model.addAttribute("medicines", medicineService.getAll());
+                    return "doctor/examine";
+                }
             }
         }
-    }
 
-    // ===== MEDICAL RECORD =====
-    MedicalRecord medicalRecord = new MedicalRecord();
-    medicalRecord.setAppointment(appointment);
-    medicalRecord.setSymptoms(symptoms.trim());
-    medicalRecord.setDiagnosis(diagnosis.trim());
-    medicalRecordService.save(medicalRecord);
+        // lịch sử
+        MedicalRecord medicalRecord = new MedicalRecord();
+        medicalRecord.setAppointment(appointment);
+        medicalRecord.setSymptoms(symptoms.trim());
+        medicalRecord.setDiagnosis(diagnosis.trim());
+        medicalRecordService.save(medicalRecord);
 
-    // ===== PRESCRIPTION =====
-    Prescription prescription = new Prescription();
-    prescription.setMedicalRecord(medicalRecord);
-    prescriptionService.save(prescription);
+        // đơn thuốc
+        Prescription prescription = new Prescription();
+        prescription.setMedicalRecord(medicalRecord);
+        prescriptionService.save(prescription);
 
-    // ===== DETAILS =====
-    if (medicineIds != null) {
-        for (int i = 0; i < medicineIds.length; i++) {
-            PrescriptionDetail detail = new PrescriptionDetail();
-            detail.setPrescription(prescription);
-            detail.setMedicine(medicineService.getById(medicineIds[i]));
-            detail.setQuantity(quantities[i]);
-            prescriptionService.saveDetail(detail);
+        // chi tiết
+        if (medicineIds != null) {
+            for (int i = 0; i < medicineIds.length; i++) {
+                PrescriptionDetail detail = new PrescriptionDetail();
+                detail.setPrescription(prescription);
+                detail.setMedicine(medicineService.getById(medicineIds[i]));
+                detail.setQuantity(quantities[i]);
+                prescriptionService.saveDetail(detail);
+            }
         }
+
+        appointment.setStatus("COMPLETED");
+        appointmentService.save(appointment);
+
+        return "redirect:/doctor/appointments";
     }
 
-    appointment.setStatus("COMPLETED");
-    appointmentService.save(appointment);
-
-    return "redirect:/doctor/appointments";
-}
     @GetMapping("/prescriptions")
-public String prescriptions(
-        HttpSession session,
-        Model model
-) {
+    public String prescriptions(
+            HttpSession session,
+            Model model
+    ) {
 
-    User user =
-            (User) session.getAttribute("user");
+        User user =
+                (User) session.getAttribute("user");
 
-    if (user == null ||
-            !user.getRole().equals("DOCTOR")) {
+        if (user == null ||
+                !user.getRole().equals("DOCTOR")) {
 
-        return "redirect:/login";
+            return "redirect:/login";
+        }
+
+        model.addAttribute(
+                "prescriptions",
+                prescriptionService
+                        .getPendingPrescriptions()
+        );
+
+        return "doctor/prescriptions";
     }
-
-    model.addAttribute(
-            "prescriptions",
-            prescriptionService
-                    .getPendingPrescriptions()
-    );
-
-    return "doctor/prescriptions";
-}
 
 @PostMapping("/prescriptions/dispense/{id}")
 public String dispenseMedicine(
-        @PathVariable Long id
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
 ) {
+    User user = (User) session.getAttribute("user");
+    if (user == null || !"DOCTOR".equals(user.getRole())) {
+        return "redirect:/login";
+    }
 
-    Prescription prescription =
-            prescriptionService.getById(id);
+    Prescription prescription = prescriptionService.getById(id);
+    if (prescription == null) {
+        return "redirect:/doctor/prescriptions";
+    }
 
-    // lấy danh sách thuốc
+    // chỉ cấp phát khi còn PENDING (tránh bấm 2 lần)
+    if (!"PENDING".equals(prescription.getStatus())) {
+        return "redirect:/doctor/prescriptions";
+    }
 
-    for (PrescriptionDetail detail :
-            prescriptionService.getDetails(
-                    prescription
-            )) {
+    var details = prescriptionService.getDetails(prescription);
 
-        Medicine medicine =
-                detail.getMedicine();
+    // validate: phải có chi tiết thuốc
+    if (details == null || details.isEmpty()) {
+        model.addAttribute("error", "Đơn thuốc không có thuốc để cấp phát");
+        model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
+        return "doctor/prescriptions";
+    }
 
-        // trừ tồn kho
+    // 1) CHECK STOCK trước
+    for (PrescriptionDetail detail : details) {
+        Medicine medicine = detail.getMedicine();
+        if (medicine == null) {
+            model.addAttribute("error", "Thuốc không hợp lệ");
+            model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
+            return "doctor/prescriptions";
+        }
+        if (medicine.getStock() < detail.getQuantity()) {
+            model.addAttribute(
+                    "error",
+                    "Thuốc " + medicine.getName() + " không đủ số lượng"
+            );
+            model.addAttribute("prescriptions", prescriptionService.getPendingPrescriptions());
+            return "doctor/prescriptions";
+        }
+    }
 
-        medicine.setStock(
-                medicine.getStock()
-                        - detail.getQuantity()
-        );
-
-        medicineService.save(
-                medicine
-        );
+    // 2) TRỪ STOCK sau khi đã check ok hết
+    for (PrescriptionDetail detail : details) {
+        Medicine medicine = detail.getMedicine();
+        medicine.setStock(medicine.getStock() - detail.getQuantity());
+        medicineService.save(medicine);
     }
 
     // đổi trạng thái
-
-    prescription.setStatus(
-            "DISPENSED"
-    );
-
-    prescriptionService.save(
-            prescription
-    );
+    prescription.setStatus("DISPENSED");
+    prescriptionService.save(prescription);
 
     return "redirect:/doctor/prescriptions";
 }

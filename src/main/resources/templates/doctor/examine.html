@@ -11,20 +11,50 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
     <style>
-        body{ background:#f4f7fb; overflow-x:hidden; }
-        .sidebar-wrapper{ position:fixed; top:0; left:0; width:260px; height:100vh; z-index:1000; }
-        .main-content{ margin-left:260px; padding:40px; min-height:100vh; }
-        .card{ border:none; border-radius:20px; }
-        .medicine-row{
-            background:#f8f9fa;
-            border:1px solid #e6e6e6;
-            border-radius:12px;
-            padding:12px;
-            margin-bottom:12px;
+        body {
+            background: #f4f7fb;
+            overflow-x: hidden;
         }
-        @media(max-width:768px){
-            .sidebar-wrapper{ position:relative; width:100%; height:auto; }
-            .main-content{ margin-left:0; padding:20px; }
+
+        .sidebar-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+        }
+
+        .medicine-row {
+            background: #f8f9fa;
+            border: 1px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-wrapper {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
         }
     </style>
 </head>

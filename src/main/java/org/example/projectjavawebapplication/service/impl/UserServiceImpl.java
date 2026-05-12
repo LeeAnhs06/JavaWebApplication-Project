@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // ================= LOGIN =================
+    //login
     @Override
     public User login(String username, String password) {
         User user = userRepository.findByUsername(username);
@@ -29,33 +29,33 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    // ================= REGISTER (HASH PASSWORD) =================
+    // register
     @Override
     public void register(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
-    // ================= UPDATE PROFILE (DO NOT TOUCH PASSWORD) =================
+    // update profile
     @Override
     public void updateProfile(User user) {
         // tuyệt đối không encode lại password ở đây
         userRepository.save(user);
     }
 
-    // ================= FIND USERNAME =================
+    // find by username
     @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    // ================= GET BY ID =================
+    // get by id
     @Override
     public User getById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
 
-    // ================= GET DOCTORS =================
+    // get doctors
     @Override
     public List<User> getDoctors() {
         return userRepository.findByRole("DOCTOR");
